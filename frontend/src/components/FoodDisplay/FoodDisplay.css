@@ -1,0 +1,21 @@
+.food-display {
+  margin: 60px 0;
+  padding: 0 40px;
+}
+
+.food-display h2 {
+  font-size: max(2vw, 24px);
+  font-weight: 600;
+  margin-bottom: 20px;
+}
+
+.food-display-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 30px;
+}
+@media (max-width: 768px) {
+  .food-display {
+    padding: 0 20px;
+  }
+}
