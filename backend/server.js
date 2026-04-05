@@ -11,35 +11,49 @@ import "dotenv/config";
 const app = express();
 const port = process.env.PORT || 5000;
 
-// ✅ Middlewares
+// ================= MIDDLEWARE =================
 app.use(express.json());
 
-// ✅ FIXED CORS (IMPORTANT)
-app.use(cors({
-  origin: "*",
-  methods: ["GET", "POST", "PUT", "DELETE"],
-  credentials: true
-}));
+// ✅ Proper CORS (IMPORTANT)
+app.use(
+  cors({
+    origin: [
+      "http://localhost:5173", // local frontend
+      "https://food-delivery-project-app.netlify.app", // your live frontend
+    ],
+    methods: ["GET", "POST", "PUT", "DELETE"],
+    credentials: true,
+  })
+);
 
-// DB connection
+// ================= DB =================
 connectDB();
 
-// API endpoints
+// ================= ROUTES =================
 app.use("/api/food", foodRouter);
 app.use("/api/user", userRouter);
 app.use("/api/cart", cartRouter);
 app.use("/api/order", orderRouter);
 
-// Static files
-app.use("/uploads", express.static("uploads"));
+// ================= STATIC FILES =================
 app.use("/images", express.static("uploads"));
+app.use("/uploads", express.static("uploads"));
 
-// Test route
+// ================= HEALTH CHECK =================
 app.get("/", (req, res) => {
-  res.send("API Working");
+  res.status(200).send("API Working 🚀");
 });
 
-// Server start
+// ================= ERROR HANDLING =================
+app.use((err, req, res, next) => {
+  console.error(err.stack);
+  res.status(500).json({
+    success: false,
+    message: "Internal Server Error",
+  });
+});
+
+// ================= SERVER START =================
 app.listen(port, () => {
-  console.log(`Server Started on port: ${port}`);
+  console.log(`Server running on port: ${port}`);
 });
