@@ -3,35 +3,43 @@ import cors from "cors";
 import { connectDB } from "./config/db.js";
 import foodRouter from "./routes/foodRoute.js";
 import userRouter from "./routes/userRoute.js";
-import "dotenv/config";
 import cartRouter from "./routes/cartRoute.js";
 import orderRouter from "./routes/orderRoute.js";
+import "dotenv/config";
 
 // app config
 const app = express();
-const port =process.env.PORT || 5000;
+const port = process.env.PORT || 5000;
 
-//middlewares
+// ✅ Middlewares
 app.use(express.json());
-app.use(cors());
+
+// ✅ FIXED CORS (IMPORTANT)
+app.use(cors({
+  origin: "*",
+  methods: ["GET", "POST", "PUT", "DELETE"],
+  credentials: true
+}));
 
 // DB connection
 connectDB();
 
-// api endpoints
+// API endpoints
 app.use("/api/food", foodRouter);
-app.use("/uploads", express.static("uploads"));
-app.use("/images", express.static("uploads"));
 app.use("/api/user", userRouter);
 app.use("/api/cart", cartRouter);
 app.use("/api/order", orderRouter);
 
+// Static files
+app.use("/uploads", express.static("uploads"));
+app.use("/images", express.static("uploads"));
+
+// Test route
 app.get("/", (req, res) => {
   res.send("API Working");
 });
 
-app.use(cors());
-
+// Server start
 app.listen(port, () => {
   console.log(`Server Started on port: ${port}`);
 });
