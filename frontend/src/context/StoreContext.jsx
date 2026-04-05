@@ -5,7 +5,7 @@ import { toast } from "react-toastify";
 export const StoreContext = createContext(null);
 
 const StoreContextProvider = (props) => {
-  const url = "https://food-delivery-app-zl53.onrender.com";
+const url = "https://food-delivery-app-zl53.onrender.com/api";
 
   const [food_list, setFoodList] = useState([]);
   const [cartItems, setCartItems] = useState({});
