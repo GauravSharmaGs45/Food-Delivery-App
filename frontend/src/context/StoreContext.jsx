@@ -5,27 +5,36 @@ import { toast } from "react-toastify";
 export const StoreContext = createContext(null);
 
 const StoreContextProvider = (props) => {
-const url = "https://food-delivery-app-zl53.onrender.com";
+  const url = "https://food-delivery-app-zl53.onrender.com";
 
   const [food_list, setFoodList] = useState([]);
   const [cartItems, setCartItems] = useState({});
   const [token, setToken] = useState("");
-
-  // 🔍 NEW SEARCH STATE
   const [searchText, setSearchText] = useState("");
 
   // ================= FETCH FOOD =================
   const fetchFoodList = async () => {
     try {
-      const response = await axios.get(url + "/api/food/list");
-      if (response.data.success) {
-        setFoodList(response.data.data);
+      const response = await axios.get(url + "/api/food/list", {
+        timeout: 10000, // ⏱️ important for render delay
+      });
+
+      console.log("API RESPONSE:", response.data); // debug
+
+      if (response.data && response.data.success) {
+        setFoodList(response.data.data || []);
       } else {
-        toast.error("Failed to fetch food list");
+        toast.error("No food data found");
       }
     } catch (error) {
-      console.log(error);
-      toast.error("Server error while fetching foods");
+      console.log("FETCH ERROR:", error);
+
+      // 🔥 Better error handling
+      if (error.code === "ECONNABORTED") {
+        toast.error("Server is waking up... try again");
+      } else {
+        toast.error("Backend not responding");
+      }
     }
   };
 
@@ -37,6 +46,7 @@ const url = "https://food-delivery-app-zl53.onrender.com";
         {},
         { headers: { token: userToken } }
       );
+
       if (response.data.success) {
         setCartItems(response.data.cartData);
       }
@@ -58,17 +68,11 @@ const url = "https://food-delivery-app-zl53.onrender.com";
 
     if (token) {
       try {
-        const response = await axios.post(
+        await axios.post(
           url + "/api/cart/add",
           { itemId },
           { headers: { token } }
         );
-
-        if (response.data.success) {
-          toast.success("Item added to cart");
-        } else {
-          toast.error("Something went wrong");
-        }
       } catch (error) {
         console.log(error);
       }
@@ -84,24 +88,18 @@ const url = "https://food-delivery-app-zl53.onrender.com";
 
     if (token) {
       try {
-        const response = await axios.post(
+        await axios.post(
           url + "/api/cart/remove",
           { itemId },
           { headers: { token } }
         );
-
-        if (response.data.success) {
-          toast.success("Item removed from cart");
-        } else {
-          toast.error("Something went wrong");
-        }
       } catch (error) {
         console.log(error);
       }
     }
   };
 
-  // ================= TOTAL CART AMOUNT =================
+  // ================= TOTAL CART =================
   const getTotalCartAmount = () => {
     let totalAmount = 0;
 
@@ -145,8 +143,6 @@ const url = "https://food-delivery-app-zl53.onrender.com";
     url,
     token,
     setToken,
-
-    // 🔍 ADD THESE
     searchText,
     setSearchText,
   };
