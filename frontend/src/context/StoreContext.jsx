@@ -8,7 +8,7 @@ const StoreContextProvider = (props) => {
 
   // ================= BACKEND URL =================
 
-  const url = "https://food-delivery-app-zl53.onrender.com";
+  const url = import.meta.env.VITE_API_URL;
 
   // ================= STATES =================
 
