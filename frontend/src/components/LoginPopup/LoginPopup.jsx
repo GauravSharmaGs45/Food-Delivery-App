@@ -53,7 +53,20 @@ const LoginPopup = ({ setShowLogin }) => {
       console.log("API URL:", newUrl);
       console.log("Sending Data:", data);
 
-      const response = await axios.post(newUrl, data);
+      toast.info(
+        "Server waking up... please wait 30-60 seconds"
+      );
+
+      const response = await axios.post(
+        newUrl,
+        data,
+        {
+          timeout: 120000,
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
 
       console.log("Response:", response.data);
 
@@ -61,7 +74,10 @@ const LoginPopup = ({ setShowLogin }) => {
 
         setToken(response.data.token);
 
-        localStorage.setItem("token", response.data.token);
+        localStorage.setItem(
+          "token",
+          response.data.token
+        );
 
         toast.success(
           currentState === "Login"
@@ -73,32 +89,44 @@ const LoginPopup = ({ setShowLogin }) => {
 
       } else {
 
-        toast.error(response.data.message || "Something went wrong");
-
+        toast.error(
+          response.data.message ||
+          "Something went wrong"
+        );
       }
 
     } catch (error) {
 
       console.log("FULL ERROR:", error);
 
-      if (error.response) {
+      if (error.code === "ECONNABORTED") {
 
         toast.error(
-          error.response.data.message || "Server Error"
+          "Server is still waking up. Try again in 30 seconds."
+        );
+
+      } else if (error.response) {
+
+        toast.error(
+          error.response.data.message ||
+          "Backend Error"
         );
 
       } else if (error.request) {
 
-        toast.error("Backend server not responding");
+        toast.error(
+          "Backend server not responding"
+        );
 
       } else {
 
         toast.error("Something went wrong");
-
       }
-    }
 
-    setLoading(false);
+    } finally {
+
+      setLoading(false);
+    }
   };
 
   return (
@@ -180,13 +208,13 @@ const LoginPopup = ({ setShowLogin }) => {
           <input type="checkbox" required />
 
           <p>
-            By continuing, I agree to the terms of use &
-            privacy policy.
+            By continuing, I agree to the terms of
+            use & privacy policy.
           </p>
 
         </div>
 
-        {/* SWITCH */}
+        {/* SWITCH LOGIN / SIGNUP */}
 
         {currentState === "Login" ? (
 
@@ -194,7 +222,9 @@ const LoginPopup = ({ setShowLogin }) => {
             Create a new account?{" "}
 
             <span
-              onClick={() => setCurrentState("Sign Up")}
+              onClick={() =>
+                setCurrentState("Sign Up")
+              }
             >
               Click here
             </span>
@@ -207,7 +237,9 @@ const LoginPopup = ({ setShowLogin }) => {
             Already have an account?{" "}
 
             <span
-              onClick={() => setCurrentState("Login")}
+              onClick={() =>
+                setCurrentState("Login")
+              }
             >
               Login here
             </span>
