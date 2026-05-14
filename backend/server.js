@@ -1,59 +1,77 @@
 import express from "express";
 import cors from "cors";
+import dotenv from "dotenv";
+
 import { connectDB } from "./config/db.js";
+
 import foodRouter from "./routes/foodRoute.js";
 import userRouter from "./routes/userRoute.js";
 import cartRouter from "./routes/cartRoute.js";
 import orderRouter from "./routes/orderRoute.js";
-import "dotenv/config";
 
-// app config
+// ================= CONFIG =================
+
+dotenv.config();
+
 const app = express();
+
 const port = process.env.PORT || 5000;
 
+// ================= DATABASE =================
+
+connectDB();
+
 // ================= MIDDLEWARE =================
+
 app.use(express.json());
 
-// ✅ Proper CORS (IMPORTANT)
 app.use(
   cors({
     origin: [
-      "http://localhost:5173", // local frontend
-      "https://food-delivery-project-app.netlify.app", // your live frontend
+      "http://localhost:5173",
+      "https://food-delivery-app-rosy-sigma.vercel.app",
+      "https://food-delivery-project-app.netlify.app",
     ],
     methods: ["GET", "POST", "PUT", "DELETE"],
     credentials: true,
   })
 );
 
-// ================= DB =================
-connectDB();
+// ================= STATIC FILES =================
+
+app.use("/images", express.static("uploads"));
+app.use("/uploads", express.static("uploads"));
 
 // ================= ROUTES =================
+
+app.get("/", (req, res) => {
+  res.status(200).json({
+    success: true,
+    message: "API Working 🚀",
+  });
+});
+
 app.use("/api/food", foodRouter);
 app.use("/api/user", userRouter);
 app.use("/api/cart", cartRouter);
 app.use("/api/order", orderRouter);
 
-// ================= STATIC FILES =================
-app.use("/images", express.static("uploads"));
-app.use("/uploads", express.static("uploads"));
+// ================= ERROR HANDLER =================
 
-// ================= HEALTH CHECK =================
-app.get("/", (req, res) => {
-  res.status(200).send("API Working 🚀");
-});
-
-// ================= ERROR HANDLING =================
 app.use((err, req, res, next) => {
-  console.error(err.stack);
+
+  console.log("SERVER ERROR:", err);
+
   res.status(500).json({
     success: false,
     message: "Internal Server Error",
   });
 });
 
-// ================= SERVER START =================
+// ================= SERVER =================
+
 app.listen(port, () => {
-  console.log(`Server running on port: ${port}`);
+
+  console.log(`Server running on port ${port}`);
+
 });
