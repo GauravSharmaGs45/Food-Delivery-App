@@ -11,15 +11,18 @@ const LoginPopup = ({ setShowLogin }) => {
 
   const [currentState, setCurrentState] = useState("Login");
 
+  const [loading, setLoading] = useState(false);
+
   const [data, setData] = useState({
     name: "",
     email: "",
     password: "",
   });
 
-  // ================= INPUT HANDLER =================
+  // ================= INPUT CHANGE =================
 
   const onChangeHandler = (event) => {
+
     const name = event.target.name;
     const value = event.target.value;
 
@@ -29,10 +32,13 @@ const LoginPopup = ({ setShowLogin }) => {
     }));
   };
 
-  // ================= LOGIN / REGISTER =================
+  // ================= LOGIN / SIGNUP =================
 
   const onLogin = async (event) => {
+
     event.preventDefault();
+
+    setLoading(true);
 
     try {
 
@@ -44,7 +50,12 @@ const LoginPopup = ({ setShowLogin }) => {
         newUrl += "/api/user/register";
       }
 
+      console.log("API URL:", newUrl);
+      console.log("Sending Data:", data);
+
       const response = await axios.post(newUrl, data);
+
+      console.log("Response:", response.data);
 
       if (response.data.success) {
 
@@ -62,24 +73,42 @@ const LoginPopup = ({ setShowLogin }) => {
 
       } else {
 
-        toast.error(response.data.message);
+        toast.error(response.data.message || "Something went wrong");
 
       }
 
     } catch (error) {
 
-      console.log(error);
+      console.log("FULL ERROR:", error);
 
-      toast.error(
-        error.response?.data?.message || "Server Error"
-      );
+      if (error.response) {
+
+        toast.error(
+          error.response.data.message || "Server Error"
+        );
+
+      } else if (error.request) {
+
+        toast.error("Backend server not responding");
+
+      } else {
+
+        toast.error("Something went wrong");
+
+      }
     }
+
+    setLoading(false);
   };
 
   return (
+
     <div className="login-popup">
 
-      <form onSubmit={onLogin} className="login-popup-container">
+      <form
+        onSubmit={onLogin}
+        className="login-popup-container"
+      >
 
         {/* TITLE */}
 
@@ -100,31 +129,33 @@ const LoginPopup = ({ setShowLogin }) => {
         <div className="login-popup-inputs">
 
           {currentState === "Sign Up" && (
+
             <input
-              name="name"
-              onChange={onChangeHandler}
-              value={data.name}
               type="text"
+              name="name"
               placeholder="Your name"
+              value={data.name}
+              onChange={onChangeHandler}
               required
             />
+
           )}
 
           <input
-            name="email"
-            onChange={onChangeHandler}
-            value={data.email}
             type="email"
+            name="email"
             placeholder="Your email"
+            value={data.email}
+            onChange={onChangeHandler}
             required
           />
 
           <input
-            name="password"
-            onChange={onChangeHandler}
-            value={data.password}
             type="password"
+            name="password"
             placeholder="Your password"
+            value={data.password}
+            onChange={onChangeHandler}
             required
           />
 
@@ -132,9 +163,11 @@ const LoginPopup = ({ setShowLogin }) => {
 
         {/* BUTTON */}
 
-        <button type="submit">
+        <button type="submit" disabled={loading}>
 
-          {currentState === "Sign Up"
+          {loading
+            ? "Please wait..."
+            : currentState === "Sign Up"
             ? "Create Account"
             : "Login"}
 
@@ -153,24 +186,32 @@ const LoginPopup = ({ setShowLogin }) => {
 
         </div>
 
-        {/* SWITCH LOGIN/SIGNUP */}
+        {/* SWITCH */}
 
         {currentState === "Login" ? (
 
           <p>
             Create a new account?{" "}
-            <span onClick={() => setCurrentState("Sign Up")}>
+
+            <span
+              onClick={() => setCurrentState("Sign Up")}
+            >
               Click here
             </span>
+
           </p>
 
         ) : (
 
           <p>
             Already have an account?{" "}
-            <span onClick={() => setCurrentState("Login")}>
+
+            <span
+              onClick={() => setCurrentState("Login")}
+            >
               Login here
             </span>
+
           </p>
 
         )}
@@ -181,4 +222,4 @@ const LoginPopup = ({ setShowLogin }) => {
   );
 };
 
-export default LoginPopup;  
+export default LoginPopup;
