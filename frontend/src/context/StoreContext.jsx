@@ -5,112 +5,197 @@ import { toast } from "react-toastify";
 export const StoreContext = createContext(null);
 
 const StoreContextProvider = (props) => {
+
+  // ================= BACKEND URL =================
+
   const url = "https://food-delivery-app-zl53.onrender.com";
+
+  // ================= STATES =================
 
   const [food_list, setFoodList] = useState([]);
   const [cartItems, setCartItems] = useState({});
   const [token, setToken] = useState("");
   const [searchText, setSearchText] = useState("");
+  const [loading, setLoading] = useState(true);
 
-  // ================= FETCH FOOD =================
+  // ================= FETCH FOOD LIST =================
+
   const fetchFoodList = async () => {
+
     try {
-      const response = await axios.get(url + "/api/food/list", {
-        timeout: 10000, // ⏱️ important for render delay
-      });
 
-      console.log("API RESPONSE:", response.data); // debug
+      console.log("Fetching food list from:", url);
 
-      if (response.data && response.data.success) {
-        setFoodList(response.data.data || []);
+      const response = await axios.get(
+        `${url}/api/food/list`,
+        {
+          timeout: 30000,
+        }
+      );
+
+      console.log("FOOD RESPONSE:", response.data);
+
+      if (response.data.success) {
+
+        setFoodList(response.data.data);
+
       } else {
-        toast.error("No food data found");
+
+        toast.error("Failed to load food items");
+
       }
+
     } catch (error) {
-      console.log("FETCH ERROR:", error);
 
-      // 🔥 Better error handling
+      console.log("FOOD ERROR:", error);
+
       if (error.code === "ECONNABORTED") {
-        toast.error("Server is waking up... try again");
+
+        toast.info(
+          "Server waking up... please wait 30-60 seconds"
+        );
+
+      } else if (error.response) {
+
+        toast.error(
+          error.response.data.message || "Server Error"
+        );
+
       } else {
-        toast.error("Backend not responding");
+
+        toast.error("Backend server not responding");
+
       }
+
+    } finally {
+
+      setLoading(false);
+
     }
   };
 
   // ================= LOAD CART =================
+
   const loadCartData = async (userToken) => {
+
     try {
+
       const response = await axios.post(
-        url + "/api/cart/get",
+        `${url}/api/cart/get`,
         {},
-        { headers: { token: userToken } }
+        {
+          headers: {
+            token: userToken,
+          },
+        }
       );
 
+      console.log("CART RESPONSE:", response.data);
+
       if (response.data.success) {
+
         setCartItems(response.data.cartData);
+
       }
+
     } catch (error) {
-      console.log(error);
+
+      console.log("CART ERROR:", error);
+
     }
   };
 
   // ================= ADD TO CART =================
+
   const addToCart = async (itemId) => {
+
     if (!cartItems[itemId]) {
-      setCartItems((prev) => ({ ...prev, [itemId]: 1 }));
+
+      setCartItems((prev) => ({
+        ...prev,
+        [itemId]: 1,
+      }));
+
     } else {
+
       setCartItems((prev) => ({
         ...prev,
         [itemId]: prev[itemId] + 1,
       }));
+
     }
 
     if (token) {
+
       try {
+
         await axios.post(
-          url + "/api/cart/add",
+          `${url}/api/cart/add`,
           { itemId },
-          { headers: { token } }
+          {
+            headers: {
+              token,
+            },
+          }
         );
+
       } catch (error) {
-        console.log(error);
+
+        console.log("ADD CART ERROR:", error);
+
       }
     }
   };
 
   // ================= REMOVE FROM CART =================
+
   const removeFromCart = async (itemId) => {
+
     setCartItems((prev) => ({
       ...prev,
       [itemId]: prev[itemId] - 1,
     }));
 
     if (token) {
+
       try {
+
         await axios.post(
-          url + "/api/cart/remove",
+          `${url}/api/cart/remove`,
           { itemId },
-          { headers: { token } }
+          {
+            headers: {
+              token,
+            },
+          }
         );
+
       } catch (error) {
-        console.log(error);
+
+        console.log("REMOVE CART ERROR:", error);
+
       }
     }
   };
 
   // ================= TOTAL CART =================
+
   const getTotalCartAmount = () => {
+
     let totalAmount = 0;
 
     for (const item in cartItems) {
+
       if (cartItems[item] > 0) {
-        const itemInfo = food_list.find(
+
+        let itemInfo = food_list.find(
           (product) => product._id === item
         );
 
         if (itemInfo) {
+
           totalAmount += itemInfo.price * cartItems[item];
+
         }
       }
     }
@@ -119,21 +204,32 @@ const StoreContextProvider = (props) => {
   };
 
   // ================= LOAD INITIAL DATA =================
+
   useEffect(() => {
-    const loadData = async () => {
+
+    async function loadData() {
+
       await fetchFoodList();
 
       const savedToken = localStorage.getItem("token");
+
       if (savedToken) {
+
         setToken(savedToken);
+
         await loadCartData(savedToken);
+
       }
-    };
+    }
 
     loadData();
+
   }, []);
 
+  // ================= CONTEXT VALUE =================
+
   const contextValue = {
+
     food_list,
     cartItems,
     setCartItems,
@@ -145,12 +241,18 @@ const StoreContextProvider = (props) => {
     setToken,
     searchText,
     setSearchText,
+    loading,
+
   };
 
   return (
+
     <StoreContext.Provider value={contextValue}>
+
       {props.children}
+
     </StoreContext.Provider>
+
   );
 };
 
