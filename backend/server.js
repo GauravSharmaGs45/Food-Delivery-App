@@ -8,6 +8,7 @@ import foodRouter from "./routes/foodRoute.js";
 import userRouter from "./routes/userRoute.js";
 import cartRouter from "./routes/cartRoute.js";
 import orderRouter from "./routes/orderRoute.js";
+import paymentRouter from "./routes/paymentRoute.js";
 
 // ================= CONFIG =================
 
@@ -42,19 +43,28 @@ app.use(
 app.use("/images", express.static("uploads"));
 app.use("/uploads", express.static("uploads"));
 
-// ================= ROUTES =================
+// ================= TEST ROUTE =================
 
 app.get("/", (req, res) => {
+
   res.status(200).json({
     success: true,
     message: "API Working 🚀",
   });
+
 });
 
+// ================= API ROUTES =================
+
 app.use("/api/food", foodRouter);
+
 app.use("/api/user", userRouter);
+
 app.use("/api/cart", cartRouter);
+
 app.use("/api/order", orderRouter);
+
+app.use("/api/payment", paymentRouter);
 
 // ================= ERROR HANDLER =================
 
@@ -66,6 +76,7 @@ app.use((err, req, res, next) => {
     success: false,
     message: "Internal Server Error",
   });
+
 });
 
 // ================= SERVER =================
