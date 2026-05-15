@@ -3,13 +3,20 @@ import "./PlaceOrder.css";
 import { StoreContext } from "../../context/StoreContext";
 import axios from "axios";
 import { toast } from "react-toastify";
-import { useNavigate } from 'react-router-dom'
+import { useNavigate } from "react-router-dom";
 
 const PlaceOrder = () => {
-  const navigate= useNavigate();
 
-  const { getTotalCartAmount, token, food_list, cartItems, url } =
-    useContext(StoreContext);
+  const navigate = useNavigate();
+
+  const {
+    getTotalCartAmount,
+    token,
+    food_list,
+    cartItems,
+    url,
+  } = useContext(StoreContext);
+
   const [data, setData] = useState({
     firstName: "",
     lastName: "",
@@ -22,52 +29,182 @@ const PlaceOrder = () => {
     phone: "",
   });
 
+  // ================= INPUT HANDLER =================
+
   const onChangeHandler = (event) => {
+
     const name = event.target.name;
     const value = event.target.value;
-    setData((data) => ({ ...data, [name]: value }));
+
+    setData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
   };
 
-  const placeOrder = async (event) => {
+  // ================= RAZORPAY PAYMENT =================
+
+  const handlePayment = async (event) => {
+
     event.preventDefault();
-    let orderItems = [];
-    food_list.map((item) => {
-      if (cartItems[item._id] > 0) {
-        let itemInfo = item;
-        itemInfo["quantity"] = cartItems[item._id];
-        orderItems.push(itemInfo);
+
+    try {
+
+      let orderItems = [];
+
+      food_list.map((item) => {
+
+        if (cartItems[item._id] > 0) {
+
+          let itemInfo = { ...item };
+
+          itemInfo["quantity"] = cartItems[item._id];
+
+          orderItems.push(itemInfo);
+        }
+      });
+
+      const totalAmount =
+        getTotalCartAmount() === 0
+          ? 0
+          : getTotalCartAmount() + 2;
+
+      // ================= CREATE ORDER =================
+
+      const response = await axios.post(
+        `${url}/api/payment/create-order`,
+        {
+          amount: totalAmount,
+        }
+      );
+
+      if (!response.data.success) {
+
+        toast.error("Failed to create payment");
+
+        return;
       }
-    });
-    let orderData = {
-      address: data,
-      items: orderItems,
-      amount: getTotalCartAmount() + 2,
-    };
-    
-    let response= await axios.post(url+"/api/order/place",orderData,{headers:{token}});
-    if(response.data.success){
-      const {session_url}=response.data;
-      window.location.replace(session_url);
-    }else{
-      toast.error("Errors!")
+
+      const order = response.data.order;
+
+      // ================= RAZORPAY OPTIONS =================
+
+      const options = {
+
+        key: "rzp_test_SpX35e3AI2lbJT",
+
+        amount: order.amount,
+
+        currency: order.currency,
+
+        name: "Food Delivery",
+
+        description: "Food Order Payment",
+
+        order_id: order.id,
+
+        handler: async function (response) {
+
+          toast.success("Payment Successful ✅");
+
+          // ================= SAVE ORDER =================
+
+          let orderData = {
+
+            address: data,
+
+            items: orderItems,
+
+            amount: totalAmount,
+
+            paymentId: response.razorpay_payment_id,
+          };
+
+          const saveOrder = await axios.post(
+            `${url}/api/order/place`,
+            orderData,
+            {
+              headers: { token },
+            }
+          );
+
+          if (saveOrder.data.success) {
+
+            navigate("/myorders");
+
+          } else {
+
+            toast.error("Order save failed");
+          }
+        },
+
+        prefill: {
+
+          name:
+            data.firstName + " " + data.lastName,
+
+          email: data.email,
+
+          contact: data.phone,
+        },
+
+        notes: {
+          address: data.street,
+        },
+
+        theme: {
+          color: "#ff6347",
+        },
+      };
+
+      const razor = new window.Razorpay(options);
+
+      razor.open();
+
+    } catch (error) {
+
+      console.log(error);
+
+      toast.error("Payment Failed");
     }
   };
 
-  useEffect(()=>{
-    if(!token){
-      toast.error("Please Login first")
-      navigate("/cart")
+  // ================= CHECK USER =================
+
+  useEffect(() => {
+
+    if (!token) {
+
+      toast.error("Please Login First");
+
+      navigate("/cart");
+
+    } else if (getTotalCartAmount() === 0) {
+
+      toast.error("Please Add Items");
+
+      navigate("/cart");
     }
-    else if(getTotalCartAmount()===0){
-      toast.error("Please Add Items to Cart");
-      navigate("/cart")
-    }
-  },[token])
+
+  }, [token]);
+
   return (
-    <form className="place-order" onSubmit={placeOrder}>
+
+    <form
+      className="place-order"
+      onSubmit={handlePayment}
+    >
+
+      {/* LEFT SIDE */}
+
       <div className="place-order-left">
-        <p className="title">Delivery Information</p>
+
+        <p className="title">
+          Delivery Information
+        </p>
+
         <div className="multi-fields">
+
           <input
             required
             name="firstName"
@@ -76,6 +213,7 @@ const PlaceOrder = () => {
             type="text"
             placeholder="First name"
           />
+
           <input
             required
             name="lastName"
@@ -84,15 +222,18 @@ const PlaceOrder = () => {
             type="text"
             placeholder="Last name"
           />
+
         </div>
+
         <input
           required
           name="email"
           value={data.email}
           onChange={onChangeHandler}
-          type="text"
+          type="email"
           placeholder="Email Address"
         />
+
         <input
           required
           name="street"
@@ -101,7 +242,9 @@ const PlaceOrder = () => {
           type="text"
           placeholder="Street"
         />
+
         <div className="multi-fields">
+
           <input
             required
             name="city"
@@ -110,6 +253,7 @@ const PlaceOrder = () => {
             type="text"
             placeholder="City"
           />
+
           <input
             required
             name="state"
@@ -118,8 +262,11 @@ const PlaceOrder = () => {
             type="text"
             placeholder="State"
           />
+
         </div>
+
         <div className="multi-fields">
+
           <input
             required
             name="zipcode"
@@ -128,6 +275,7 @@ const PlaceOrder = () => {
             type="text"
             placeholder="Zip Code"
           />
+
           <input
             required
             name="country"
@@ -136,7 +284,9 @@ const PlaceOrder = () => {
             type="text"
             placeholder="Country"
           />
+
         </div>
+
         <input
           required
           name="phone"
@@ -145,31 +295,66 @@ const PlaceOrder = () => {
           type="text"
           placeholder="Phone"
         />
+
       </div>
+
+      {/* RIGHT SIDE */}
+
       <div className="place-order-right">
+
         <div className="cart-total">
+
           <h2>Cart Totals</h2>
+
           <div>
+
             <div className="cart-total-details">
-              <p>Subtotals</p>
+
+              <p>Subtotal</p>
+
               <p>${getTotalCartAmount()}</p>
+
             </div>
+
             <hr />
+
             <div className="cart-total-details">
+
               <p>Delivery Fee</p>
-              <p>${getTotalCartAmount() === 0 ? 0 : 2}</p>
+
+              <p>
+                ${getTotalCartAmount() === 0 ? 0 : 2}
+              </p>
+
             </div>
+
             <hr />
+
             <div className="cart-total-details">
+
               <b>Total</b>
+
               <b>
-                ${getTotalCartAmount() === 0 ? 0 : getTotalCartAmount() + 2}
+                $
+                {getTotalCartAmount() === 0
+                  ? 0
+                  : getTotalCartAmount() + 2}
               </b>
+
             </div>
+
           </div>
-          <button type="submit">PROCEED TO PAYMENT</button>
+
+          <button type="submit">
+
+            PROCEED TO PAYMENT
+
+          </button>
+
         </div>
+
       </div>
+
     </form>
   );
 };
