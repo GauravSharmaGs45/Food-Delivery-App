@@ -5,17 +5,35 @@
     align-items: center;
 }
 
-.navbar .logo{
-    width: 150px;
+/* ================= YUMHUB LOGO ================= */
+
+.logo-text{
+    text-decoration: none;
+    color: #ff4c24;
+    font-size: 42px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.logo-text:hover{
+    transform: scale(1.03);
 }
 
 /* ================= MENU ================= */
+
 .navbar-menu{
     display: flex;
     list-style: none;
-    gap: 20px;
+    gap: 25px;
     color: #49557e;
     font-size: 18px;
+    align-items: center;
+}
+
+.navbar-menu a{
+    text-decoration: none;
+    color: inherit;
 }
 
 .navbar li{
@@ -23,19 +41,34 @@
 }
 
 /* ACTIVE LINK */
+
 .navbar .active{
     padding-bottom: 2px;
     border-bottom: 2px solid #49557e;
 }
 
 /* ================= RIGHT ================= */
+
 .navbar-right{
     display: flex;
     align-items: center;
-    gap: 40px;
+    gap: 35px;
+}
+
+/* SEARCH ICON */
+
+.search-icon{
+    cursor: pointer;
+    width: 24px;
+    transition: 0.3s;
+}
+
+.search-icon:hover{
+    transform: scale(1.1);
 }
 
 /* BUTTON */
+
 .navbar button{
     background: transparent;
     font-size: 16px;
@@ -49,11 +82,17 @@
 
 .navbar button:hover{
     background-color: #fff4f2;
+    transform: scale(1.03);
 }
 
 /* ================= CART ================= */
+
 .navbar-search-icon{
     position: relative;
+}
+
+.navbar-search-icon img{
+    width: 24px;
 }
 
 .navbar-search-icon .dot{
@@ -67,8 +106,14 @@
 }
 
 /* ================= PROFILE ================= */
+
 .navbar-profile{
     position: relative;
+}
+
+.navbar-profile img{
+    width: 32px;
+    cursor: pointer;
 }
 
 .nav-profile-dropdown{
@@ -84,7 +129,7 @@
     gap: 10px;
     background-color: #fff2ef;
     padding: 12px 25px;
-    border-radius: 6px;
+    border-radius: 10px;
     border: 1px solid tomato;
     outline: 2px solid white;
     list-style: none;
@@ -105,10 +150,11 @@
     color: tomato;
 }
 
-/* ================= 🔍 SEARCH BAR ================= */
+/* ================= SEARCH BAR ================= */
+
 .search-bar{
     position: fixed;
-    top: 80px;
+    top: 90px;
     left: 50%;
     transform: translateX(-50%);
     width: 350px;
@@ -117,41 +163,41 @@
 
 .search-bar input{
     width: 100%;
-    padding: 12px;
-    border-radius: 10px;
+    padding: 14px;
+    border-radius: 12px;
     border: 1px solid #ccc;
     outline: none;
-    font-size: 14px;
+    font-size: 15px;
+    box-shadow: 0px 2px 10px rgba(0,0,0,0.1);
 }
 
 /* ================= RESPONSIVE ================= */
-@media (max-width:1050px) {
-    .navbar .logo{
-        width: 140px;
-    } 
+
+@media (max-width:1050px){
+
+    .logo-text{
+        font-size: 36px;
+    }
 
     .navbar-menu{
-        gap: 20px;
+        gap: 18px;
         font-size: 17px;
     }
 
     .navbar-right{
-        gap: 30px;
-    }
-
-    .navbar-right img{
-        width: 22px;
+        gap: 25px;
     }
 
     .navbar-right button{
-        padding: 8px 25px;
+        padding: 8px 24px;
     }
 }
 
-@media (max-width:900px) {
-    .navbar .logo{
-        width: 120px;
-    } 
+@media (max-width:900px){
+
+    .logo-text{
+        font-size: 32px;
+    }
 
     .navbar-menu{
         gap: 15px;
@@ -159,21 +205,31 @@
     }
 
     .navbar-right{
-        gap: 20px;
-    }
-
-    .navbar-right img{
-        width: 20px;
+        gap: 18px;
     }
 
     .navbar-right button{
-        padding: 7px 20px;
-        font-size: 15px;
+        padding: 7px 18px;
+        font-size: 14px;
+    }
+
+    .search-bar{
+        width: 300px;
     }
 }
 
-@media (max-width:750px) { 
+@media (max-width:750px){
+
     .navbar-menu{
         display: none;
+    }
+
+    .logo-text{
+        font-size: 28px;
+    }
+
+    .search-bar{
+        width: 250px;
+        top: 80px;
     }
 }

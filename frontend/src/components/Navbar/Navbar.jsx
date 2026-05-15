@@ -6,6 +6,7 @@ import { StoreContext } from "../../context/StoreContext";
 import { toast } from "react-toastify";
 
 const Navbar = ({ setShowLogin }) => {
+
   const {
     getTotalCartAmount,
     token,
@@ -19,106 +20,207 @@ const Navbar = ({ setShowLogin }) => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  // 🔥 Hide search + clear when leaving menu
+  // ================= HIDE SEARCH =================
+
   useEffect(() => {
+
     if (location.pathname !== "/menu") {
+
       setShowSearch(false);
+
       setSearchText("");
+
     }
-  }, [location.pathname]);
+
+  }, [location.pathname, setSearchText]);
+
+  // ================= LOGOUT =================
 
   const logout = () => {
+
     localStorage.removeItem("token");
+
     setToken("");
+
     toast.success("Logout Successfully");
+
     navigate("/");
+
   };
 
   return (
+
     <>
+
       <div className="navbar">
-        {/* Logo */}
-        <Link to="/">
-          <img src={assets.logo} alt="" className="logo" />
+
+        {/* ================= LOGO ================= */}
+
+        <Link
+          to="/"
+          className="logo-text"
+        >
+          YumHub
         </Link>
 
-        {/* Menu */}
+        {/* ================= MENU ================= */}
+
         <ul className="navbar-menu">
-          <Link to="/" className={location.pathname === "/" ? "active" : ""}>
+
+          <Link
+            to="/"
+            className={location.pathname === "/" ? "active" : ""}
+          >
             home
           </Link>
 
-          <Link to="/menu" className={location.pathname === "/menu" ? "active" : ""}>
+          <Link
+            to="/menu"
+            className={location.pathname === "/menu" ? "active" : ""}
+          >
             menu
           </Link>
 
-          <Link to="/mobile-app" className={location.pathname === "/mobile-app" ? "active" : ""}>
+          <Link
+            to="/mobile-app"
+            className={location.pathname === "/mobile-app" ? "active" : ""}
+          >
             mobile-app
           </Link>
 
-          <Link to="/contact" className={location.pathname === "/contact" ? "active" : ""}>
+          <Link
+            to="/contact"
+            className={location.pathname === "/contact" ? "active" : ""}
+          >
             contact us
           </Link>
+
         </ul>
 
-        {/* Right Section */}
+        {/* ================= RIGHT ================= */}
+
         <div className="navbar-right">
-          {/* 🔍 SEARCH ICON */}
+
+          {/* SEARCH ICON */}
+
           <img
             src={assets.search_icon}
             alt=""
-            style={{ cursor: "pointer" }}
+            className="search-icon"
             onClick={() => {
-              navigate("/menu");        // go to menu
-              setShowSearch(true);      // always show search
+
+              navigate("/menu");
+
+              setShowSearch(true);
+
             }}
           />
 
-          {/* Cart */}
+          {/* CART */}
+
           <div className="navbar-search-icon">
+
             <Link to="/cart">
-              <img src={assets.basket_icon} alt="" />
+
+              <img
+                src={assets.basket_icon}
+                alt=""
+              />
+
             </Link>
-            <div className={getTotalCartAmount() === 0 ? "" : "dot"}></div>
+
+            <div
+              className={
+                getTotalCartAmount() === 0
+                  ? ""
+                  : "dot"
+              }
+            ></div>
+
           </div>
 
-          {/* Auth */}
+          {/* LOGIN / PROFILE */}
+
           {!token ? (
-            <button onClick={() => setShowLogin(true)}>sign in</button>
+
+            <button
+              onClick={() => setShowLogin(true)}
+            >
+              sign in
+            </button>
+
           ) : (
+
             <div className="navbar-profile">
-              <img src={assets.profile_icon} alt="" />
+
+              <img
+                src={assets.profile_icon}
+                alt=""
+              />
+
               <ul className="nav-profile-dropdown">
-                <li onClick={() => navigate("/myorders")}>
-                  <img src={assets.bag_icon} alt="" />
+
+                <li
+                  onClick={() => navigate("/myorders")}
+                >
+
+                  <img
+                    src={assets.bag_icon}
+                    alt=""
+                  />
+
                   <p>Orders</p>
+
                 </li>
+
                 <hr />
+
                 <li onClick={logout}>
-                  <img src={assets.logout_icon} alt="" />
+
+                  <img
+                    src={assets.logout_icon}
+                    alt=""
+                  />
+
                   <p>Logout</p>
+
                 </li>
+
               </ul>
+
             </div>
+
           )}
+
         </div>
+
       </div>
 
-      {/* 🔍 SEARCH INPUT */}
-      {showSearch && location.pathname === "/menu" && (
+      {/* ================= SEARCH BAR ================= */}
+
+      {showSearch &&
+        location.pathname === "/menu" && (
+
         <div className="search-bar">
+
           <input
             type="text"
             value={searchText}
             placeholder="Search food..."
             autoFocus
             onChange={(e) => {
+
               setSearchText(e.target.value);
+
             }}
           />
+
         </div>
+
       )}
+
     </>
+
   );
 };
 
