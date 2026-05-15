@@ -1,8 +1,42 @@
 import express from "express";
-import { createOrder } from "../controllers/paymentController.js";
+import Razorpay from "razorpay";
 
 const paymentRouter = express.Router();
 
-paymentRouter.post("/create-order", createOrder);
+const razorpay = new Razorpay({
+  key_id: process.env.RAZORPAY_KEY_ID,
+  key_secret: process.env.RAZORPAY_KEY_SECRET,
+});
+
+// ================= CREATE ORDER =================
+
+paymentRouter.post("/create-order", async (req, res) => {
+
+  try {
+
+    const options = {
+
+      amount: req.body.amount * 100,
+
+      currency: "INR",
+    };
+
+    const order = await razorpay.orders.create(options);
+
+    res.json({
+      success: true,
+      order,
+    });
+
+  } catch (error) {
+
+    console.log(error);
+
+    res.json({
+      success: false,
+      message: "Payment Error",
+    });
+  }
+});
 
 export default paymentRouter;

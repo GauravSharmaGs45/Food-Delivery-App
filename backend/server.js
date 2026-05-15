@@ -2,7 +2,11 @@ import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
 
+// ================= IMPORT DB =================
+
 import { connectDB } from "./config/db.js";
+
+// ================= IMPORT ROUTES =================
 
 import foodRouter from "./routes/foodRoute.js";
 import userRouter from "./routes/userRoute.js";
@@ -28,11 +32,7 @@ app.use(express.json());
 
 app.use(
   cors({
-    origin: [
-      "http://localhost:5173",
-      "https://food-delivery-app-rosy-sigma.vercel.app",
-      "https://food-delivery-project-app.netlify.app",
-    ],
+    origin: "*",
     methods: ["GET", "POST", "PUT", "DELETE"],
     credentials: true,
   })
@@ -41,6 +41,7 @@ app.use(
 // ================= STATIC FILES =================
 
 app.use("/images", express.static("uploads"));
+
 app.use("/uploads", express.static("uploads"));
 
 // ================= TEST ROUTE =================
